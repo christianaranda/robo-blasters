@@ -86,6 +86,31 @@ http://localhost:8080
 
 **Important:** The game must be served from a web server (not opened directly as a file) because it uses ES6 modules.
 
+## GitHub Pages Deployment
+
+This game can be deployed to GitHub Pages for easy hosting. **Note:** Only single-player mode will work on GitHub Pages. Multiplayer requires a separate Node.js server.
+
+### Setup Steps:
+
+1. **Push your code to GitHub** (if you haven't already)
+
+2. **Enable GitHub Pages:**
+   - Go to your repository on GitHub
+   - Click **Settings** → **Pages**
+   - Under "Source", select **Deploy from a branch**
+   - Choose **main** branch and **/ (root)** folder
+   - Click **Save**
+
+3. **Your game will be available at:**
+   ```
+   https://[your-username].github.io/robo-blasters/
+   ```
+
+The `.nojekyll` file in the repository root ensures GitHub Pages serves all files correctly (including files starting with underscores).
+
+### Multiplayer Note:
+Multiplayer functionality requires the server to be running separately (see `server/README.md`). On GitHub Pages, the multiplayer button will attempt to connect but will fail gracefully, allowing single-player mode to work normally.
+
 ## Requirements
 
 - A modern web browser with WebGL support
