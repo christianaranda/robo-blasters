@@ -1,0 +1,1414 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Robo Blasters - 3D FPS Game | Defeat Enemy Robots</title>
+    
+    <!-- SEO Meta Tags -->
+    <meta name="description" content="Robo Blasters - An action-packed 3D first-person shooter game. Defeat all enemy robots in the arena using multiple weapons and attachments. Play free in your browser!">
+    <meta name="keywords" content="fps game, 3d game, shooter game, browser game, three.js, webgl game, free game, robo blasters">
+    <meta name="author" content="Robo Blasters">
+    <meta name="robots" content="index, follow">
+    
+    <!-- Open Graph / Facebook -->
+    <meta property="og:type" content="website">
+    <meta property="og:title" content="Robo Blasters - 3D FPS Game">
+    <meta property="og:description" content="Defeat all enemy robots in the arena to win! An action-packed 3D first-person shooter game.">
+    <meta property="og:image" content="https://via.placeholder.com/1200x630/0066ff/ffffff?text=Robo+Blasters">
+    
+    <!-- Twitter -->
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="Robo Blasters - 3D FPS Game">
+    <meta name="twitter:description" content="Defeat all enemy robots in the arena to win! An action-packed 3D first-person shooter game.">
+    <meta name="twitter:image" content="https://via.placeholder.com/1200x630/0066ff/ffffff?text=Robo+Blasters">
+    
+    <!-- Favicon -->
+    <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🤖</text></svg>">
+    
+    <!-- Google Fonts - Futuristic Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Rajdhani:wght@300;400;600;700&display=swap" rel="stylesheet">
+    
+    <!-- PWA Manifest -->
+    <link rel="manifest" href="/manifest.json">
+    <meta name="theme-color" content="#00ffff">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="Robo Blasters">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            overflow: hidden;
+            font-family: 'Arial', sans-serif;
+            background: #000;
+        }
+
+        #canvas-container {
+            width: 100vw;
+            height: 100vh;
+        }
+
+        #ui-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 100;
+        }
+
+        #multiplayer-hud {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: rgba(0, 0, 0, 0.7);
+            padding: 15px;
+            border-radius: 10px;
+            min-width: 200px;
+            pointer-events: none;
+        }
+
+        #multiplayer-hud h3 {
+            color: white;
+            font-size: 18px;
+            margin-bottom: 10px;
+            text-align: center;
+        }
+
+        #player-list-hud-list {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+
+        #player-list-hud-list li {
+            padding: 8px;
+            margin-bottom: 5px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 5px;
+            color: white;
+            font-size: 14px;
+        }
+
+        #player-list-hud-list .player-name {
+            font-weight: bold;
+            margin-right: 10px;
+        }
+
+        #player-list-hud-list .player-health-bar {
+            width: 100%;
+            height: 6px;
+            background: rgba(255, 0, 0, 0.3);
+            border-radius: 3px;
+            margin-top: 5px;
+            overflow: hidden;
+        }
+
+        #player-list-hud-list .player-health-fill {
+            height: 100%;
+            background: #4CAF50;
+            transition: width 0.3s;
+        }
+
+        #player-list-hud-list .player-score {
+            float: right;
+            color: #ffff00;
+        }
+
+        #connection-info {
+            margin-top: 10px;
+            padding-top: 10px;
+            border-top: 1px solid rgba(255, 255, 255, 0.2);
+            text-align: center;
+            color: #aaa;
+            font-size: 12px;
+        }
+
+        #team-score-container {
+            color: #00ff00;
+            font-weight: bold;
+        }
+
+        #crosshair {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 20px;
+            height: 20px;
+            pointer-events: none;
+        }
+
+        #crosshair::before,
+        #crosshair::after {
+            content: '';
+            position: absolute;
+            background: rgba(255, 255, 255, 0.8);
+        }
+
+        #crosshair::before {
+            width: 2px;
+            height: 10px;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+        }
+
+        #crosshair::after {
+            width: 10px;
+            height: 2px;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+        }
+
+        #hud {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            color: white;
+            font-size: 18px;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.8);
+        }
+
+        #hud div {
+            margin-bottom: 10px;
+        }
+
+        #minimap {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            width: 200px;
+            height: 200px;
+            border: 2px solid rgba(255, 255, 255, 0.8);
+            background: rgba(0, 0, 0, 0.5);
+            z-index: 100;
+            pointer-events: none;
+        }
+
+        #hotbar {
+            position: absolute;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            display: flex;
+            gap: 5px;
+            z-index: 100;
+        }
+
+        .hotbar-slot {
+            width: 60px;
+            height: 60px;
+            background: rgba(0, 0, 0, 0.7);
+            border: 2px solid rgba(255, 255, 255, 0.5);
+            border-radius: 5px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.2s;
+            position: relative;
+        }
+
+        .hotbar-slot.active {
+            border-color: #4CAF50;
+            background: rgba(76, 175, 80, 0.3);
+            box-shadow: 0 0 10px rgba(76, 175, 80, 0.5);
+        }
+
+        .hotbar-slot:hover {
+            background: rgba(255, 255, 255, 0.1);
+        }
+
+        .hotbar-slot-number {
+            position: absolute;
+            top: 2px;
+            left: 4px;
+            font-size: 12px;
+            color: rgba(255, 255, 255, 0.7);
+        }
+
+        .hotbar-slot-name {
+            font-size: 10px;
+            color: white;
+            text-align: center;
+            margin-top: 5px;
+        }
+
+        #start-screen {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.9);
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            color: white;
+            z-index: 200;
+            pointer-events: all;
+        }
+
+        #party-lobby {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.95);
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            color: white;
+            z-index: 201;
+            pointer-events: all;
+        }
+
+        #party-lobby h1 {
+            font-size: 48px;
+            margin-bottom: 30px;
+            color: #00ffff;
+        }
+
+        #party-lobby input::placeholder {
+            color: rgba(255, 255, 255, 0.5);
+        }
+
+        #player-list li {
+            padding: 15px;
+            margin-bottom: 10px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 5px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        #player-list .player-name {
+            font-size: 18px;
+            font-weight: bold;
+        }
+
+        #player-list .player-status {
+            font-size: 14px;
+            color: #aaa;
+        }
+
+        #player-list .player-ready {
+            color: #4CAF50;
+            font-weight: bold;
+        }
+
+        #player-list .player-leader {
+            color: #ff9800;
+            font-weight: bold;
+        }
+
+        #start-screen h1 {
+            font-family: 'Orbitron', 'Arial Black', sans-serif;
+            font-size: 80px;
+            font-weight: 900;
+            margin-bottom: 30px;
+            text-transform: uppercase;
+            letter-spacing: 10px;
+            color: #00ffff;
+            text-shadow: 
+                0 0 20px rgba(0, 255, 255, 0.8),
+                0 0 40px rgba(0, 255, 255, 0.5),
+                4px 4px 8px rgba(0, 0, 0, 0.9);
+            animation: titleGlow 3s ease-in-out infinite alternate;
+        }
+        
+        @keyframes titleGlow {
+            from {
+                text-shadow: 
+                    0 0 20px rgba(0, 255, 255, 0.8),
+                    0 0 40px rgba(0, 255, 255, 0.5),
+                    4px 4px 8px rgba(0, 0, 0, 0.9);
+            }
+            to {
+                text-shadow: 
+                    0 0 30px rgba(0, 255, 255, 1),
+                    0 0 50px rgba(0, 255, 255, 0.7),
+                    4px 4px 8px rgba(0, 0, 0, 0.9);
+            }
+        }
+
+        #start-screen p {
+            font-size: 20px;
+            margin-bottom: 10px;
+            text-align: center;
+        }
+
+        #start-button {
+            margin-top: 30px;
+            padding: 15px 40px;
+            font-size: 24px;
+            background: #4CAF50;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background 0.3s;
+        }
+
+        #start-button:hover {
+            background: #45a049;
+        }
+
+        #multiplayer-button {
+            margin-top: 15px;
+            padding: 12px 30px;
+            font-size: 20px;
+            background: #2196F3;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background 0.3s;
+        }
+
+        #multiplayer-button:hover {
+            background: #1976D2;
+        }
+
+        #help-button {
+            margin-top: 15px;
+            padding: 12px 30px;
+            font-size: 20px;
+            background: rgba(255, 255, 255, 0.2);
+            color: white;
+            border: 2px solid rgba(255, 255, 255, 0.5);
+            border-radius: 5px;
+            cursor: pointer;
+            transition: all 0.3s;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.8);
+            pointer-events: auto !important;
+            position: relative;
+            z-index: 201;
+        }
+
+        #help-button:hover {
+            background: rgba(255, 255, 255, 0.3);
+            border-color: rgba(255, 255, 255, 0.8);
+            transform: scale(1.05);
+        }
+
+        .difficulty-buttons {
+            display: flex;
+            gap: 15px;
+            margin: 20px 0;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+
+        .difficulty-button {
+            padding: 12px 30px;
+            font-size: 20px;
+            background: rgba(255, 255, 255, 0.2);
+            color: white;
+            border: 2px solid rgba(255, 255, 255, 0.5);
+            border-radius: 5px;
+            cursor: pointer;
+            transition: all 0.3s;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.8);
+        }
+
+        .difficulty-button:hover {
+            background: rgba(255, 255, 255, 0.3);
+            border-color: rgba(255, 255, 255, 0.8);
+            transform: scale(1.05);
+        }
+
+        .difficulty-button.selected {
+            background: #4CAF50;
+            border-color: #4CAF50;
+            font-weight: bold;
+        }
+
+        .difficulty-button.selected:hover {
+            background: #45a049;
+        }
+
+        .hidden {
+            display: none !important;
+        }
+
+        #pause-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.8);
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            color: white;
+            z-index: 200;
+            pointer-events: all;
+        }
+
+        #pause-overlay h1 {
+            font-size: 64px;
+            margin-bottom: 20px;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.8);
+        }
+
+        #pause-overlay p {
+            font-size: 24px;
+            text-align: center;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.8);
+        }
+
+        #pause-overlay .pause-content {
+            display: flex;
+            gap: 40px;
+            max-width: 1200px;
+            width: 90%;
+            margin: 0 auto;
+        }
+
+        #pause-overlay .pause-section {
+            flex: 1;
+            background: rgba(0, 0, 0, 0.7);
+            padding: 20px;
+            border-radius: 10px;
+            border: 2px solid rgba(255, 255, 255, 0.3);
+        }
+
+        #pause-overlay .pause-section h2 {
+            font-size: 32px;
+            margin-bottom: 20px;
+            color: #ffff00;
+            text-align: center;
+        }
+
+        #pause-overlay .settings-item {
+            margin-bottom: 20px;
+        }
+
+        #pause-overlay .settings-item label {
+            display: block;
+            font-size: 18px;
+            margin-bottom: 8px;
+            color: white;
+        }
+
+        #pause-overlay .settings-item input[type="range"] {
+            width: 100%;
+            height: 8px;
+            border-radius: 5px;
+            background: #333;
+            outline: none;
+        }
+
+        #pause-overlay .settings-item input[type="range"]::-webkit-slider-thumb {
+            appearance: none;
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            background: #4CAF50;
+            cursor: pointer;
+        }
+
+        #pause-overlay .settings-item input[type="range"]::-moz-range-thumb {
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            background: #4CAF50;
+            cursor: pointer;
+            border: none;
+        }
+
+        #pause-overlay .volume-value {
+            color: #ffff00;
+            font-size: 16px;
+            margin-left: 10px;
+        }
+
+        #pause-overlay .leaderboard-list {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+
+        #pause-overlay .leaderboard-item {
+            padding: 12px;
+            margin-bottom: 10px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 5px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        #pause-overlay .leaderboard-rank {
+            font-size: 20px;
+            font-weight: bold;
+            color: #ffff00;
+            min-width: 40px;
+        }
+
+        #pause-overlay .leaderboard-score {
+            font-size: 24px;
+            color: white;
+            font-weight: bold;
+        }
+
+        #pause-overlay .leaderboard-date {
+            font-size: 14px;
+            color: #aaa;
+        }
+
+        #leaderboard-difficulty-selector {
+            padding: 8px 12px;
+            font-size: 16px;
+            background: rgba(255, 255, 255, 0.2);
+            color: white;
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            border-radius: 5px;
+            cursor: pointer;
+            outline: none;
+        }
+
+        #leaderboard-difficulty-selector:hover {
+            background: rgba(255, 255, 255, 0.3);
+        }
+
+        #leaderboard-difficulty-selector option {
+            background: #333;
+            color: white;
+        }
+
+        #pause-overlay .no-scores {
+            text-align: center;
+            color: #aaa;
+            font-size: 18px;
+            padding: 20px;
+        }
+
+        #attachment-menu {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.85);
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            color: white;
+            z-index: 200;
+            pointer-events: all;
+        }
+
+        #attachment-menu h1 {
+            font-size: 48px;
+            margin-bottom: 10px;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.8);
+            color: #00ffff;
+        }
+
+        #attachment-menu .weapon-name {
+            font-size: 24px;
+            margin-bottom: 30px;
+            color: #ffff00;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.8);
+        }
+
+        #attachment-menu .attachment-list {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+            max-width: 600px;
+            width: 90%;
+            max-height: 60vh;
+            overflow-y: auto;
+        }
+
+        #attachment-menu .attachment-item {
+            background: rgba(255, 255, 255, 0.1);
+            border: 2px solid rgba(255, 255, 255, 0.3);
+            border-radius: 8px;
+            padding: 15px 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            transition: all 0.3s;
+        }
+
+        #attachment-menu .attachment-item:hover {
+            background: rgba(255, 255, 255, 0.2);
+            border-color: rgba(255, 255, 255, 0.5);
+        }
+
+        #attachment-menu .attachment-item.equipped {
+            border-color: #4CAF50;
+            background: rgba(76, 175, 80, 0.2);
+        }
+
+        #attachment-menu .attachment-info {
+            flex: 1;
+        }
+
+        #attachment-menu .attachment-name {
+            font-size: 20px;
+            font-weight: bold;
+            margin-bottom: 5px;
+            color: white;
+        }
+
+        #attachment-menu .attachment-stats {
+            font-size: 14px;
+            color: #aaa;
+        }
+
+        #attachment-menu .attachment-button {
+            padding: 10px 20px;
+            font-size: 16px;
+            background: #4CAF50;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background 0.3s;
+        }
+
+        #attachment-menu .attachment-button:hover {
+            background: #45a049;
+        }
+
+        #attachment-menu .attachment-button.equipped {
+            background: #f44336;
+        }
+
+        #attachment-menu .attachment-button.equipped:hover {
+            background: #da190b;
+        }
+
+        #attachment-menu .close-button {
+            margin-top: 30px;
+            padding: 12px 30px;
+            font-size: 18px;
+            background: rgba(255, 255, 255, 0.2);
+            color: white;
+            border: 2px solid rgba(255, 255, 255, 0.5);
+            border-radius: 5px;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        #attachment-menu .close-button:hover {
+            background: rgba(255, 255, 255, 0.3);
+            border-color: rgba(255, 255, 255, 0.8);
+        }
+
+
+        #help-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.95);
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            color: white;
+            z-index: 200;
+            pointer-events: all;
+        }
+
+        #help-overlay h1 {
+            font-size: 64px;
+            margin-bottom: 30px;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.8);
+            color: #4CAF50;
+        }
+
+        #tutorial-content {
+            max-width: 900px;
+            width: 90%;
+            max-height: 70vh;
+            position: relative;
+            margin-bottom: 30px;
+            overflow-y: auto;
+            overflow-x: hidden;
+        }
+
+        .tutorial-slide {
+            display: none;
+            background: rgba(255, 255, 255, 0.1);
+            padding: 25px 30px;
+            border-radius: 15px;
+            border: 2px solid rgba(255, 255, 255, 0.3);
+            animation: fadeIn 0.3s ease-in;
+            min-height: fit-content;
+        }
+
+        .tutorial-slide.active {
+            display: block;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .tutorial-slide h2 {
+            font-size: 28px;
+            margin-bottom: 15px;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.8);
+            color: #4CAF50;
+            text-align: center;
+        }
+
+        .tutorial-text {
+            font-size: 16px;
+            line-height: 1.5;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.8);
+        }
+
+        .tutorial-text p {
+            margin-bottom: 10px;
+        }
+
+        .tutorial-list {
+            margin: 10px 0;
+            padding-left: 25px;
+        }
+
+        .tutorial-list li {
+            margin-bottom: 6px;
+        }
+
+        .tutorial-list li strong {
+            color: #4CAF50;
+            font-weight: bold;
+        }
+
+        .tutorial-navigation {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 20px;
+            margin-bottom: 20px;
+            position: sticky;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.95);
+            padding: 15px 0;
+            z-index: 10;
+        }
+
+        .tutorial-nav-button {
+            padding: 10px 25px;
+            font-size: 16px;
+            background: rgba(255, 255, 255, 0.2);
+            color: white;
+            border: 2px solid rgba(255, 255, 255, 0.5);
+            border-radius: 5px;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .tutorial-nav-button:hover:not(:disabled) {
+            background: rgba(255, 255, 255, 0.3);
+            border-color: rgba(255, 255, 255, 0.8);
+        }
+
+        .tutorial-nav-button:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        #tutorial-page-indicator {
+            font-size: 18px;
+            padding: 10px 20px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 5px;
+            min-width: 80px;
+            text-align: center;
+        }
+
+        #help-overlay .close-button {
+            margin-top: 10px;
+            padding: 12px 30px;
+            font-size: 18px;
+            background: rgba(255, 255, 255, 0.2);
+            color: white;
+            border: 2px solid rgba(255, 255, 255, 0.5);
+            border-radius: 5px;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        #help-overlay .close-button:hover {
+            background: rgba(255, 255, 255, 0.3);
+            border-color: rgba(255, 255, 255, 0.8);
+        }
+
+        #game-over-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.9);
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            color: white;
+            z-index: 200;
+            pointer-events: all;
+        }
+
+        #game-over-overlay h1 {
+            font-size: 64px;
+            margin-bottom: 20px;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.8);
+            color: #ff0000;
+        }
+
+        #game-over-overlay p {
+            font-size: 24px;
+            text-align: center;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.8);
+        }
+
+        #victory-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.9);
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            color: white;
+            z-index: 200;
+            pointer-events: all;
+        }
+
+        #victory-overlay h1 {
+            font-size: 64px;
+            margin-bottom: 20px;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.8);
+            color: #00ff00;
+        }
+
+        #victory-overlay p {
+            font-size: 24px;
+            text-align: center;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.8);
+            margin-bottom: 10px;
+        }
+
+        #victory-score {
+            font-size: 32px;
+            color: #ffff00;
+            margin: 20px 0;
+        }
+
+        #victory-high-score {
+            font-size: 28px;
+            color: #00ffff;
+            margin: 10px 0;
+        }
+
+        #final-score {
+            font-size: 32px;
+            color: #ffff00;
+            margin: 20px 0;
+        }
+
+        #final-high-score {
+            font-size: 28px;
+            color: #00ffff;
+            margin: 10px 0;
+        }
+
+        #restart-button {
+            margin-top: 30px;
+            padding: 15px 40px;
+            font-size: 24px;
+            background: #4CAF50;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background 0.3s;
+        }
+
+        #restart-button:hover {
+            background: #45a049;
+        }
+
+        #return-to-menu-button {
+            margin-top: 20px;
+            padding: 15px 40px;
+            font-size: 24px;
+            background: #ff6600;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background 0.3s;
+        }
+
+        #return-to-menu-button:hover {
+            background: #e55a00;
+        }
+
+        #victory-restart-button {
+            margin-top: 30px;
+            padding: 15px 40px;
+            font-size: 24px;
+            background: #4CAF50;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background 0.3s;
+        }
+
+        #victory-restart-button:hover {
+            background: #45a049;
+        }
+
+        #victory-return-to-menu-button {
+            margin-top: 20px;
+            padding: 15px 40px;
+            font-size: 24px;
+            background: #ff6600;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background 0.3s;
+        }
+
+        #victory-return-to-menu-button:hover {
+            background: #e55a00;
+        }
+
+        .share-buttons {
+            display: flex;
+            gap: 15px;
+            margin-top: 20px;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+
+        .share-button {
+            padding: 12px 24px;
+            font-size: 18px;
+            background: rgba(255, 255, 255, 0.2);
+            color: white;
+            border: 2px solid rgba(255, 255, 255, 0.5);
+            border-radius: 5px;
+            cursor: pointer;
+            transition: all 0.3s;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.8);
+        }
+
+        .share-button:hover {
+            background: rgba(255, 255, 255, 0.3);
+            border-color: rgba(255, 255, 255, 0.8);
+            transform: scale(1.05);
+        }
+
+        .share-button.copied {
+            background: #4CAF50;
+            border-color: #4CAF50;
+        }
+
+        #pause-return-button {
+            margin-top: 20px;
+            padding: 15px 40px;
+            font-size: 20px;
+            background: #ff6600;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background 0.3s;
+        }
+
+        #pause-return-button:hover {
+            background: #e55a00;
+        }
+        
+        @keyframes gradientShift {
+            0% {
+                background-position: 0% 50%;
+            }
+            50% {
+                background-position: 100% 50%;
+            }
+            100% {
+                background-position: 0% 50%;
+            }
+        }
+        
+    </style>
+    <script>
+        // Set correct difficulty selection immediately to prevent flash
+        (function() {
+            try {
+                const savedDifficulty = localStorage.getItem('roboBlastersDifficulty') || 'medium';
+                // This will run after DOM is parsed but before render
+                if (document.readyState === 'loading') {
+                    document.addEventListener('DOMContentLoaded', function() {
+                        const buttons = document.querySelectorAll('.difficulty-button');
+                        buttons.forEach(button => {
+                            button.classList.remove('selected');
+                            button.setAttribute('aria-checked', 'false');
+                            if (button.getAttribute('data-difficulty') === savedDifficulty) {
+                                button.classList.add('selected');
+                                button.setAttribute('aria-checked', 'true');
+                            }
+                        });
+                    });
+                } else {
+                    // DOM already loaded, set immediately
+                    const buttons = document.querySelectorAll('.difficulty-button');
+                    buttons.forEach(button => {
+                        button.classList.remove('selected');
+                        button.setAttribute('aria-checked', 'false');
+                        if (button.getAttribute('data-difficulty') === savedDifficulty) {
+                            button.classList.add('selected');
+                            button.setAttribute('aria-checked', 'true');
+                        }
+                    });
+                }
+            } catch (e) {
+                // Silently fail if localStorage not available
+            }
+        })();
+    </script>
+</head>
+<body>
+    <div id="start-screen">
+        <h1>ROBO BLASTERS</h1>
+        <p>WASD - Move</p>
+        <p>Mouse - Look around</p>
+        <p>Left Click - Shoot</p>
+        <p>R - Reload</p>
+        <p>Space - Jump</p>
+        <p>P - Pause</p>
+        <div class="difficulty-buttons" role="radiogroup" aria-label="Select difficulty level">
+            <button class="difficulty-button" data-difficulty="easy" aria-checked="false" role="radio" aria-label="Easy difficulty with 3 blue robots">Easy (3 blue)</button>
+            <button class="difficulty-button" data-difficulty="medium" aria-checked="false" role="radio" aria-label="Medium difficulty with 5 blue robots">Medium (5 blue)</button>
+            <button class="difficulty-button" data-difficulty="hard" aria-checked="false" role="radio" aria-label="Hard difficulty with 10 blue robots">Hard (10 blue)</button>
+            <button class="difficulty-button" data-difficulty="hardcore" aria-checked="false" role="radio" aria-label="Hardcore difficulty with 15 blue robots">Hardcore (15 blue)</button>
+        </div>
+        <div style="margin: 15px 0;">
+            <label style="display: flex; align-items: center; justify-content: center; gap: 10px; cursor: pointer; color: white; font-size: 18px;">
+                <input type="checkbox" id="endless-mode-checkbox" style="width: 20px; height: 20px; cursor: pointer;">
+                <span>Endless Mode (Robots respawn)</span>
+            </label>
+        </div>
+        <div style="margin: 15px 0;">
+            <label style="display: flex; align-items: center; justify-content: center; gap: 10px; cursor: pointer; color: white; font-size: 18px;">
+                <input type="checkbox" id="survival-mode-checkbox" style="width: 20px; height: 20px; cursor: pointer;">
+                <span>Survival Mode (Wave-based)</span>
+            </label>
+        </div>
+        <button id="start-button" aria-label="Start the game">Start Game</button>
+        <button id="multiplayer-button" aria-label="Play multiplayer">Multiplayer</button>
+        <button id="help-button" onclick="if(window.game){window.game.toggleHelpMenu();}" aria-label="Open help and tutorial">Help</button>
+    </div>
+
+    <div id="party-lobby" class="hidden">
+        <h1>MULTIPLAYER LOBBY</h1>
+        <div id="party-actions">
+            <div id="create-party-section">
+                <input type="text" id="player-name-input" placeholder="Enter your name" maxlength="20" style="padding: 10px; font-size: 18px; margin-bottom: 10px; width: 250px; border-radius: 5px; border: 2px solid rgba(255, 255, 255, 0.3); background: rgba(255, 255, 255, 0.1); color: white;">
+                <button id="create-party-button" style="padding: 12px 30px; font-size: 20px; background: #4CAF50; color: white; border: none; border-radius: 5px; cursor: pointer; margin-right: 10px;">Create Party</button>
+            </div>
+            <div id="join-party-section" style="margin-top: 20px;">
+                <input type="text" id="room-code-input" placeholder="Enter room code" maxlength="6" style="padding: 10px; font-size: 18px; margin-bottom: 10px; width: 250px; border-radius: 5px; border: 2px solid rgba(255, 255, 255, 0.3); background: rgba(255, 255, 255, 0.1); color: white; text-transform: uppercase;">
+                <button id="join-party-button" style="padding: 12px 30px; font-size: 20px; background: #2196F3; color: white; border: none; border-radius: 5px; cursor: pointer;">Join Party</button>
+            </div>
+            <div style="margin-top: 30px;">
+                <button id="back-to-menu-button" style="padding: 12px 30px; font-size: 20px; background: rgba(255, 255, 255, 0.2); color: white; border: 2px solid rgba(255, 255, 255, 0.5); border-radius: 5px; cursor: pointer; transition: all 0.3s;">← Back to Menu</button>
+            </div>
+        </div>
+        <div id="party-info" class="hidden" style="margin-top: 30px;">
+            <div style="background: rgba(255, 255, 255, 0.1); padding: 20px; border-radius: 10px; margin-bottom: 20px;">
+                <p style="font-size: 18px; margin-bottom: 10px;">Room Code: <strong id="room-code-display" style="color: #00ff00; font-size: 24px; letter-spacing: 3px;"></strong></p>
+                <p style="font-size: 14px; color: #aaa;">Share this code with friends to join your party</p>
+            </div>
+            <div class="difficulty-buttons" role="radiogroup" aria-label="Select difficulty level">
+                <button class="difficulty-button" data-difficulty="easy" aria-checked="false" role="radio">Easy (3 blue)</button>
+                <button class="difficulty-button" data-difficulty="medium" aria-checked="false" role="radio">Medium (5 blue)</button>
+                <button class="difficulty-button" data-difficulty="hard" aria-checked="false" role="radio">Hard (10 blue)</button>
+                <button class="difficulty-button" data-difficulty="hardcore" aria-checked="false" role="radio">Hardcore (15 blue)</button>
+            </div>
+            <div id="party-players" style="margin-top: 20px; min-height: 200px;">
+                <h3 style="font-size: 24px; margin-bottom: 15px;">Players (1/4)</h3>
+                <ul id="player-list" style="list-style: none; padding: 0;">
+                    <!-- Player list items will be added here -->
+                </ul>
+            </div>
+            <div id="party-controls" style="margin-top: 20px;">
+                <button id="ready-button" style="padding: 12px 30px; font-size: 20px; background: #ff9800; color: white; border: none; border-radius: 5px; cursor: pointer; margin-right: 10px;">Ready</button>
+                <button id="start-party-game-button" class="hidden" style="padding: 12px 30px; font-size: 20px; background: #4CAF50; color: white; border: none; border-radius: 5px; cursor: pointer; margin-right: 10px;">Start Game</button>
+                <button id="leave-party-button" style="padding: 12px 30px; font-size: 20px; background: #f44336; color: white; border: none; border-radius: 5px; cursor: pointer;">Leave Party</button>
+            </div>
+        </div>
+        <div id="connection-status" style="position: absolute; top: 20px; right: 20px; padding: 10px; background: rgba(0, 0, 0, 0.7); border-radius: 5px;">
+            <span id="connection-indicator" style="display: inline-block; width: 10px; height: 10px; border-radius: 50%; background: #f44336; margin-right: 5px;"></span>
+            <span id="connection-text">Disconnected</span>
+        </div>
+    </div>
+
+    <div id="canvas-container"></div>
+    <canvas id="minimap" width="200" height="200"></canvas>
+
+    <div id="ui-overlay">
+        <div id="crosshair"></div>
+        <div id="hud">
+            <div>Score: <span id="score">0</span></div>
+            <div>High Score: <span id="high-score">0</span></div>
+            <div>Ammo: <span id="ammo">30</span> / <span id="ammo-max">30</span></div>
+            <div>Health: <span id="health">100</span></div>
+        </div>
+        <div id="wave-display" class="hidden" style="position: fixed; top: 20px; left: 50%; transform: translateX(-50%); background: rgba(0, 0, 0, 0.7); padding: 15px 30px; border-radius: 10px; text-align: center; z-index: 101;">
+            <div style="font-size: 32px; font-weight: bold; color: #00ffff; margin-bottom: 5px;">Wave <span id="wave-number">1</span></div>
+            <div id="wave-enemies-remaining" style="font-size: 18px; color: white;"></div>
+        </div>
+        <div id="wave-break-overlay" class="hidden" style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0, 0, 0, 0.8); display: flex; flex-direction: column; justify-content: center; align-items: center; z-index: 200; color: white; text-align: center; pointer-events: none;">
+            <h1 style="font-size: 48px; margin-bottom: 20px; color: #00ff00;">Wave Complete!</h1>
+            <div id="break-stats" style="font-size: 24px; margin-bottom: 30px;"></div>
+            <div id="break-timer" style="font-size: 32px; color: #ffff00; margin-bottom: 20px;"></div>
+            <p style="font-size: 18px; color: #aaa;">Press Space to skip break</p>
+        </div>
+        <div id="hotbar">
+            <div class="hotbar-slot active" data-weapon="0">
+                <span class="hotbar-slot-number">1</span>
+                <div class="hotbar-slot-name">Pistol</div>
+            </div>
+            <div class="hotbar-slot" data-weapon="1">
+                <span class="hotbar-slot-number">2</span>
+                <div class="hotbar-slot-name">Rifle</div>
+            </div>
+            <div class="hotbar-slot" data-weapon="2">
+                <span class="hotbar-slot-number">3</span>
+                <div class="hotbar-slot-name">Shotgun</div>
+            </div>
+            <div class="hotbar-slot" data-weapon="3">
+                <span class="hotbar-slot-number">4</span>
+                <div class="hotbar-slot-name">SMG</div>
+            </div>
+            <div class="hotbar-slot" data-weapon="4">
+                <span class="hotbar-slot-number">5</span>
+                <div class="hotbar-slot-name">Sniper</div>
+            </div>
+        </div>
+    </div>
+
+    <div id="pause-overlay" class="hidden" role="dialog" aria-labelledby="pause-title" aria-modal="true">
+        <h1 id="pause-title">PAUSED</h1>
+        <p>Press P to resume</p>
+        <div class="pause-content">
+            <div class="pause-section">
+                <h2>Settings</h2>
+                <div class="settings-item">
+                    <label for="volume-slider">Music Volume: <span class="volume-value" id="volume-display">50</span>%</label>
+                    <input type="range" id="volume-slider" min="0" max="100" value="50">
+                </div>
+                <div class="settings-item">
+                    <label>Now Playing: <span id="current-track-name">-</span></label>
+                    <div style="margin-top: 10px; display: flex; gap: 10px;">
+                        <button id="prev-track-button" style="padding: 8px 15px; font-size: 14px; background: rgba(255, 255, 255, 0.2); color: white; border: 1px solid rgba(255, 255, 255, 0.5); border-radius: 5px; cursor: pointer;">◀ Previous</button>
+                        <button id="next-track-button" style="padding: 8px 15px; font-size: 14px; background: rgba(255, 255, 255, 0.2); color: white; border: 1px solid rgba(255, 255, 255, 0.5); border-radius: 5px; cursor: pointer;">Next ▶</button>
+                    </div>
+                </div>
+            </div>
+            <div class="pause-section">
+                <h2>Leaderboard</h2>
+                <ul class="leaderboard-list" id="leaderboard-list">
+                    <li class="no-scores">No scores yet</li>
+                </ul>
+            </div>
+        </div>
+        <button id="pause-return-button" aria-label="Return to main menu">Return to Menu</button>
+    </div>
+
+    <div id="attachment-menu" class="hidden" role="dialog" aria-labelledby="attachment-title" aria-modal="true">
+        <h1 id="attachment-title">Weapon Attachments</h1>
+        <div class="weapon-name" id="attachment-weapon-name">Current Weapon</div>
+        <div class="attachment-list" id="attachment-list">
+            <!-- Attachment items will be dynamically generated -->
+        </div>
+        <button class="close-button" id="attachment-close-button" aria-label="Close attachment menu">Close (Press T)</button>
+    </div>
+
+    <div id="help-overlay" class="hidden" role="dialog" aria-labelledby="tutorial-title" aria-modal="true">
+        <h1 id="tutorial-title">TUTORIAL</h1>
+        <div id="tutorial-content">
+            <div id="tutorial-slide" class="tutorial-slide active">
+                <h2>Welcome to Robo Blasters!</h2>
+                <div class="tutorial-text">
+                    <p>You're a skilled marksman tasked with eliminating enemy robots in an arena. This tutorial will teach you everything you need to know.</p>
+                    <p>Use the arrow buttons below to navigate through the tutorial.</p>
+                </div>
+            </div>
+            
+            <div id="tutorial-slide" class="tutorial-slide">
+                <h2>Movement Controls</h2>
+                <div class="tutorial-text">
+                    <p><strong>WASD Keys</strong> - Move your character:</p>
+                    <ul class="tutorial-list">
+                        <li><strong>W</strong> - Move forward</li>
+                        <li><strong>S</strong> - Move backward</li>
+                        <li><strong>A</strong> - Strafe left</li>
+                        <li><strong>D</strong> - Strafe right</li>
+                    </ul>
+                    <p><strong>Space</strong> - Jump to reach higher platforms and avoid obstacles</p>
+                    <p><strong>Mouse</strong> - Move your mouse to look around and aim</p>
+                </div>
+            </div>
+            
+            <div id="tutorial-slide" class="tutorial-slide">
+                <h2>Combat Basics</h2>
+                <div class="tutorial-text">
+                    <p><strong>Left Click</strong> - Fire your weapon at enemies</p>
+                    <p><strong>R Key</strong> - Reload when you run out of ammo</p>
+                    <p><strong>1-5 Keys</strong> - Switch between different weapons:</p>
+                    <ul class="tutorial-list">
+                        <li>1 - Pistol (balanced)</li>
+                        <li>2 - Rifle (accurate, high damage)</li>
+                        <li>3 - Shotgun (close range, high damage)</li>
+                        <li>4 - SMG (rapid fire)</li>
+                        <li>5 - Sniper (long range, very high damage)</li>
+                    </ul>
+                </div>
+            </div>
+            
+            <div id="tutorial-slide" class="tutorial-slide">
+                <h2>Weapon Attachments</h2>
+                <div class="tutorial-text">
+                    <p><strong>T Key</strong> - Open the weapon attachments menu</p>
+                    <p>You can equip up to 2 attachments per weapon to enhance their capabilities:</p>
+                    <ul class="tutorial-list">
+                        <li><strong>Extended Magazine</strong> - More ammo capacity</li>
+                        <li><strong>Rapid Fire</strong> - Faster firing rate</li>
+                        <li><strong>Damage Boost</strong> - Increased damage</li>
+                        <li><strong>Scope</strong> - Better accuracy and zoom</li>
+                        <li><strong>Silencer</strong> - Reduced recoil</li>
+                    </ul>
+                    <p>Experiment with different combinations to find your preferred playstyle!</p>
+                </div>
+            </div>
+            
+            <div id="tutorial-slide" class="tutorial-slide">
+                <h2>Gameplay Tips</h2>
+                <div class="tutorial-text">
+                    <p><strong>Objective:</strong> Defeat all enemy robots in the arena to win!</p>
+                    <p><strong>Health & Ammo:</strong> Keep an eye on your health (top-left) and ammo count. If health reaches zero, it's game over!</p>
+                    <p><strong>Power-ups:</strong> Collect power-ups scattered around the arena for temporary advantages like health regeneration or damage boosts</p>
+                    <p><strong>Movement:</strong> Keep moving! Standing still makes you an easy target. Use cover and jump on platforms to avoid enemy fire</p>
+                    <p><strong>Scoring:</strong> Earn points by destroying enemies. Try to beat your high score!</p>
+                </div>
+            </div>
+            
+            <div id="tutorial-slide" class="tutorial-slide">
+                <h2>Other Controls</h2>
+                <div class="tutorial-text">
+                    <p><strong>P Key</strong> - Pause the game to access settings, view leaderboard, or take a break</p>
+                    <p><strong>H Key</strong> - Open this tutorial anytime during gameplay</p>
+                    <p><strong>Mini-map:</strong> Check the top-right corner for enemy positions and power-up locations</p>
+                </div>
+            </div>
+            
+            <div id="tutorial-slide" class="tutorial-slide">
+                <h2>Ready to Play!</h2>
+                <div class="tutorial-text">
+                    <p>You're now ready to take on the enemy robots!</p>
+                    <p><strong>Difficulty Levels:</strong></p>
+                    <ul class="tutorial-list">
+                        <li><strong>Easy</strong> - 3 robots (good for learning)</li>
+                        <li><strong>Medium</strong> - 5 robots (balanced challenge)</li>
+                        <li><strong>Hard</strong> - 8 robots (for experienced players)</li>
+                    </ul>
+                    <p>Select your difficulty and click "Start Game" to begin your mission!</p>
+                    <p>Good luck, and remember: stay mobile, aim true, and watch your ammo!</p>
+                </div>
+            </div>
+        </div>
+        <div class="tutorial-navigation">
+            <button id="tutorial-prev" class="tutorial-nav-button">◀ Previous</button>
+            <span id="tutorial-page-indicator">1 / 7</span>
+            <button id="tutorial-next" class="tutorial-nav-button">Next ▶</button>
+        </div>
+        <button class="close-button" id="help-close-button" aria-label="Close tutorial">Close Tutorial</button>
+    </div>
+
+    <div id="game-over-overlay" class="hidden" role="dialog" aria-labelledby="game-over-title" aria-modal="true">
+        <h1 id="game-over-title">GAME OVER</h1>
+        <p>You have been defeated!</p>
+        <p>Final Score: <span id="final-score">0</span></p>
+        <p>High Score: <span id="final-high-score">0</span></p>
+        <div class="share-buttons">
+            <button id="share-score-button" class="share-button" aria-label="Share your score">Share Score</button>
+            <button id="copy-score-button" class="share-button" aria-label="Copy score to clipboard">Copy Score</button>
+        </div>
+        <button id="restart-button" aria-label="Restart the game">Restart Game</button>
+        <button id="return-to-menu-button" aria-label="Return to main menu">Return to Menu</button>
+    </div>
+
+    <div id="victory-overlay" class="hidden" role="dialog" aria-labelledby="victory-title" aria-modal="true">
+        <h1 id="victory-title">VICTORY!</h1>
+        <p>All enemy robots defeated!</p>
+        <p>Final Score: <span id="victory-score">0</span></p>
+        <p>High Score: <span id="victory-high-score">0</span></p>
+        <div class="share-buttons">
+            <button id="victory-share-score-button" class="share-button" aria-label="Share your score">Share Score</button>
+            <button id="victory-copy-score-button" class="share-button" aria-label="Copy score to clipboard">Copy Score</button>
+        </div>
+        <button id="victory-restart-button" aria-label="Restart the game">Restart Game</button>
+        <button id="victory-return-to-menu-button" aria-label="Return to main menu">Return to Menu</button>
+    </div>
+
+    <script type="importmap">
+    {
+        "imports": {
+            "three": "https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js",
+            "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.160.0/examples/jsm/",
+            "socket.io-client": "https://cdn.jsdelivr.net/npm/socket.io-client@4.6.1/dist/socket.io.esm.min.js"
+        }
+    }
+    </script>
+
+    <script type="module" src="src/main.js"></script>
+</body>
+</html>
+

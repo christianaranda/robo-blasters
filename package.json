@@ -1,0 +1,17 @@
+{
+  "name": "threejs-fps-game",
+  "version": "1.0.0",
+  "description": "A basic first-person shooter game built with Three.js",
+  "type": "module",
+  "scripts": {
+    "start": "npx http-server . -p 8080 -c-1",
+    "dev": "npx http-server . -p 8080 -c-1"
+  },
+  "keywords": ["three.js", "fps", "game"],
+  "author": "",
+  "license": "MIT",
+  "dependencies": {
+    "socket.io-client": "^4.6.1"
+  }
+}
+
