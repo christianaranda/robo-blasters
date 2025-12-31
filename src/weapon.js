@@ -603,9 +603,6 @@ export class Weapon {
     }
     
     shoot(currentTime, targets = [], obstacles = []) {
-        // #region agent log
-        fetch('http://127.0.0.1:7242/ingest/bda41e12-0745-4148-84b8-3fd6e6c315e8',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'weapon.js:604',message:'Shoot called',data:{weaponType:this.weaponType,canShoot:this.canShoot,isReloading:this.isReloading,currentAmmo:this.currentAmmo,hasConfig:!!this.config,hasSoundManager:!!this.soundEffectManager},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'A,B'})}).catch(()=>{});
-        // #endregion
         if (!this.canShoot || this.isReloading) return false;
         
         // Melee weapons (lightsaber) don't consume ammo
@@ -640,9 +637,6 @@ export class Weapon {
             else if (weaponType.includes('shotgun')) soundType = 'gunshot_shotgun';
             else if (weaponType.includes('smg')) soundType = 'gunshot_smg';
             else if (weaponType.includes('sniper')) soundType = 'gunshot_sniper';
-            // #region agent log
-            fetch('http://127.0.0.1:7242/ingest/bda41e12-0745-4148-84b8-3fd6e6c315e8',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'weapon.js:639',message:'Playing sound',data:{weaponType:weaponType,soundType:soundType},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'A'})}).catch(()=>{});
-            // #endregion
             this.soundEffectManager.playSound(soundType);
         }
         
@@ -674,12 +668,6 @@ export class Weapon {
             }
             
             if (isTarget) {
-                // #region agent log
-                const isHitBox = hitObject.userData && hitObject.userData.target !== undefined || hitObject === hitObject.parent?.userData?.target?.hitBox;
-                const hitObjectName = hitObject.name || hitObject.type || 'unknown';
-                const hasTargetUserData = !!hitObject.userData?.target;
-                fetch('http://127.0.0.1:7242/ingest/bda41e12-0745-4148-84b8-3fd6e6c315e8',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'weapon.js:654',message:'Target hit detected',data:{intersectCount:allIntersects.length,hitObjectType:hitObjectName,isHitBox:isHitBox,hasTargetUserData:hasTargetUserData,hitPoint:{x:hit.point.x.toFixed(2),y:hit.point.y.toFixed(2),z:hit.point.z.toFixed(2)},distance:hit.distance.toFixed(2)},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'A,B,C'})}).catch(()=>{});
-                // #endregion
                 if (this.onHit) {
                     const finalDamage = this.damage * this.damageBoost;
                     this.onHit(hitObject, hit.point, finalDamage);
@@ -690,10 +678,6 @@ export class Weapon {
                     this.soundEffectManager.playSound('ricochet', { volume: 0.6 });
                 }
             }
-        } else {
-            // #region agent log
-            fetch('http://127.0.0.1:7242/ingest/bda41e12-0745-4148-84b8-3fd6e6c315e8',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'weapon.js:662',message:'No target hit',data:{targetCount:targets.length},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'A'})}).catch(()=>{});
-            // #endregion
         }
         
         if (this.onShoot) {

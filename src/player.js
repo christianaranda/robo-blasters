@@ -626,11 +626,6 @@ export class Player {
         this.camera.rotation.order = 'YXZ';
         this.camera.rotation.y = this.yaw;
         this.camera.rotation.x = this.pitch;
-        // #region agent log
-        if (Math.random() < 0.1) { // Sample 10% of updates
-            fetch('http://127.0.0.1:7242/ingest/bda41e12-0745-4148-84b8-3fd6e6c315e8',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'player.js:553',message:'Camera rotation update',data:{pitch:this.pitch.toFixed(3),yaw:this.yaw.toFixed(3),cameraRotation:{x:this.camera.rotation.x.toFixed(3),y:this.camera.rotation.y.toFixed(3),z:this.camera.rotation.z.toFixed(3)},cameraPosition:{x:this.camera.position.x.toFixed(2),y:this.camera.position.y.toFixed(2),z:this.camera.position.z.toFixed(2)}},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'C'})}).catch(()=>{});
-        }
-        // #endregion
         
         // Update camera position (offset by eye height)
         this.camera.position.copy(this.position);

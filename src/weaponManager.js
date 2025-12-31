@@ -91,9 +91,6 @@ export class WeaponManager {
             if (weapon.gunModel) {
                 weapon.gunModel.visible = (index === 0);
             }
-            // #region agent log
-            fetch('http://127.0.0.1:7242/ingest/bda41e12-0745-4148-84b8-3fd6e6c315e8',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'weaponManager.js:94',message:'Weapon created',data:{type:type,name:config.name,hasGunModel:!!weapon.gunModel,hasSoundManager:!!weapon.soundEffectManager,hasConfig:!!weapon.config,currentAmmo:weapon.currentAmmo,damage:weapon.damage},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'A,B'})}).catch(()=>{});
-            // #endregion
         });
     }
     
@@ -120,10 +117,6 @@ export class WeaponManager {
     switchWeapon(index) {
         if (index < 0 || index >= this.weapons.length) return;
         if (index === this.currentWeaponIndex) return;
-        
-        // #region agent log
-        fetch('http://127.0.0.1:7242/ingest/bda41e12-0745-4148-84b8-3fd6e6c315e8',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'weaponManager.js:117',message:'Switching weapon',data:{fromIndex:this.currentWeaponIndex,toIndex:index,weaponType:this.weapons[index]?.weaponType,hasGunModel:!!this.weapons[index]?.gunModel},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'C'})}).catch(()=>{});
-        // #endregion
         
         // Play weapon switch sound
         if (this.soundEffectManager) {

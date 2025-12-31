@@ -200,14 +200,6 @@ export class Target {
         // Update world matrix for collision (recursively to update hitbox)
         this.mesh.updateMatrixWorld(true);
         
-        // #region agent log
-        if (Math.random() < 0.1 && this.hitBox) { // Sample 10% of updates
-            const hitBoxWorldPos = new THREE.Vector3();
-            this.hitBox.getWorldPosition(hitBoxWorldPos);
-            fetch('http://127.0.0.1:7242/ingest/bda41e12-0745-4148-84b8-3fd6e6c315e8',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'target.js:194',message:'Target updated',data:{meshPosition:{x:this.mesh.position.x.toFixed(2),y:this.mesh.position.y.toFixed(2),z:this.mesh.position.z.toFixed(2)},hitBoxWorldPos:{x:hitBoxWorldPos.x.toFixed(2),y:hitBoxWorldPos.y.toFixed(2),z:hitBoxWorldPos.z.toFixed(2)},hitBoxVisible:this.hitBox.visible,isDestroyed:this.isDestroyed},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'B'})}).catch(()=>{});
-        }
-        // #endregion
-        
         // Remove any existing health bars (cleanup for already-created targets)
         if (this.healthBarGroup && this.mesh) {
             if (this.healthBarGroup.parent === this.mesh) {
@@ -433,6 +425,8 @@ export class Target {
             this.shootCooldown = 2000; // Shoot every 2 seconds
             this.projectiles = [];
             this.pistolMesh = null; // Will be set in createPistol
+            this.maxProjectileRange = 30; // Maximum range in units
+            this.accuracySpread = 0.15; // Spread angle in radians (~8.6 degrees)
         }
         
         // Health bar properties
@@ -597,6 +591,40 @@ export class Target {
         const direction = new THREE.Vector3();
         direction.subVectors(playerPosition, targetPos).normalize();
         
+        // Add accuracy spread (randomness) to make shots less precise
+        // Add random angular spread to the direction
+        const spread = this.accuracySpread || 0.15;
+        
+        // Generate random angles for horizontal and vertical spread
+        const horizontalSpread = (Math.random() - 0.5) * spread;
+        const verticalSpread = (Math.random() - 0.5) * spread;
+        
+        // Create perpendicular vectors for rotation
+        const right = new THREE.Vector3();
+        right.crossVectors(direction, new THREE.Vector3(0, 1, 0));
+        if (right.length() < 0.1) {
+            // If direction is nearly vertical, use a different perpendicular
+            right.crossVectors(direction, new THREE.Vector3(1, 0, 0));
+        }
+        right.normalize();
+        
+        const up = new THREE.Vector3();
+        up.crossVectors(right, direction);
+        up.normalize();
+        
+        // Apply horizontal spread (rotate around up vector)
+        const horizontalRotation = new THREE.Quaternion();
+        horizontalRotation.setFromAxisAngle(up, horizontalSpread);
+        direction.applyQuaternion(horizontalRotation);
+        
+        // Apply vertical spread (rotate around right vector)
+        const verticalRotation = new THREE.Quaternion();
+        verticalRotation.setFromAxisAngle(right, verticalSpread);
+        direction.applyQuaternion(verticalRotation);
+        
+        // Re-normalize after applying spread
+        direction.normalize();
+        
         // Check line of sight - make sure no obstacles are blocking the shot
         if (this.collisionObjects && this.collisionObjects.length > 0) {
             const raycaster = new THREE.Raycaster();
@@ -604,8 +632,23 @@ export class Target {
             const distanceToPlayer = targetPos.distanceTo(playerPosition);
             raycaster.far = distanceToPlayer + 1; // Check distance to player + buffer
             
+            // Filter out targets from collision objects - only check obstacles (walls, trees, etc.)
+            // Targets have userData.target set, so we exclude those
+            const obstaclesOnly = this.collisionObjects.filter(obj => {
+                // Exclude targets (they have userData.target pointing to a Target instance)
+                if (obj.userData && obj.userData.target) {
+                    // Check if it's actually a target (not just a reference)
+                    const target = obj.userData.target;
+                    // If it's a Target instance (has isDestroyed property), exclude it
+                    if (target && typeof target.isDestroyed !== 'undefined') {
+                        return false; // This is a target, exclude it
+                    }
+                }
+                return true; // This is an obstacle, include it
+            });
+            
             // Check if any obstacles block the line of sight
-            const obstacleIntersects = raycaster.intersectObjects(this.collisionObjects, true);
+            const obstacleIntersects = raycaster.intersectObjects(obstaclesOnly, true);
             
             if (obstacleIntersects.length > 0) {
                 const firstHit = obstacleIntersects[0];
@@ -643,9 +686,11 @@ export class Target {
         const projectileData = {
             mesh: projectile,
             velocity: direction.clone().multiplyScalar(15), // Speed
-            lifetime: 3000, // 3 seconds
+            lifetime: 3000, // 3 seconds (fallback)
             age: 0,
-            damage: 10
+            damage: 10,
+            startPosition: startPos.clone(), // Store starting position for range check
+            maxRange: this.maxProjectileRange || 30 // Maximum range
         };
         
         if (!this.projectiles) {
@@ -678,8 +723,17 @@ export class Target {
             // Update age
             proj.age += deltaTime * 1000;
             
-            // Remove if expired
-            if (proj.age >= proj.lifetime) {
+            // Check if projectile exceeded maximum range
+            let exceededRange = false;
+            if (proj.startPosition && proj.maxRange) {
+                const distanceTraveled = proj.startPosition.distanceTo(proj.mesh.position);
+                if (distanceTraveled >= proj.maxRange) {
+                    exceededRange = true;
+                }
+            }
+            
+            // Remove if expired or exceeded range
+            if (proj.age >= proj.lifetime || exceededRange) {
                 this.scene.remove(proj.mesh);
                 proj.mesh.geometry.dispose();
                 proj.mesh.material.dispose();
@@ -1167,12 +1221,6 @@ export class TargetManager {
                 }
             }
         }
-        
-        // #region agent log
-        const foundTarget = !!target;
-        const isHitBox = targetMesh.userData && targetMesh.userData.isHitBox;
-        fetch('http://127.0.0.1:7242/ingest/bda41e12-0745-4148-84b8-3fd6e6c315e8',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'target.js:1094',message:'HandleHit called',data:{foundTarget:foundTarget,isHitBox:isHitBox,hitMeshType:targetMesh?.type,hasUserData:!!targetMesh?.userData?.target,hasDirectTarget:!!targetMesh?.userData?.target,damage:damage},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'A,C'})}).catch(()=>{});
-        // #endregion
         
         if (target && !target.isDestroyed) {
             target.takeDamage(damage);

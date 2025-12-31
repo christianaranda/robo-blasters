@@ -278,26 +278,10 @@ class Game {
     }
     
     clearErrors() {
-        // #region agent log
-        const endlessBefore = document.getElementById('endless-mode-checkbox');
-        const multiplayerBefore = document.getElementById('multiplayer-button');
-        fetch('http://127.0.0.1:7242/ingest/bda41e12-0745-4148-84b8-3fd6e6c315e8',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'main.js:265',message:'clearErrors called',data:{endlessExists:!!endlessBefore,multiplayerExists:!!multiplayerBefore,endlessParent:endlessBefore?.parentElement?.id,multiplayerParent:multiplayerBefore?.parentElement?.id},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'A,B,C'})}).catch(()=>{});
-        // #endregion
-        
         // Remove any existing error divs - be very specific to only remove error divs
         const existingErrors = document.querySelectorAll('div[data-error-div="true"]');
         
-        // #region agent log
-        fetch('http://127.0.0.1:7242/ingest/bda41e12-0745-4148-84b8-3fd6e6c315e8',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'main.js:268',message:'Error cleanup query results',data:{errorCount:existingErrors.length,errorIds:Array.from(existingErrors).map(el=>el.id||'no-id'),errorTags:Array.from(existingErrors).map(el=>el.tagName)},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'A'})}).catch(()=>{});
-        // #endregion
-        
         existingErrors.forEach(el => {
-            // #region agent log
-            const endlessDuring = document.getElementById('endless-mode-checkbox');
-            const multiplayerDuring = document.getElementById('multiplayer-button');
-            fetch('http://127.0.0.1:7242/ingest/bda41e12-0745-4148-84b8-3fd6e6c315e8',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'main.js:270',message:'Processing error element',data:{elId:el.id||'no-id',elTag:el.tagName,willRemove:el.tagName === 'DIV' && el.hasAttribute('data-error-div') && el.getAttribute('data-error-div') === 'true',endlessExists:!!endlessDuring,multiplayerExists:!!multiplayerDuring},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'A'})}).catch(()=>{});
-            // #endregion
-            
             // Triple check: must be a div, have the attribute, and have error-like styling
             if (el.tagName === 'DIV' && 
                 el.hasAttribute('data-error-div') && 
@@ -306,12 +290,6 @@ class Game {
                 el.remove();
             }
         });
-        
-        // #region agent log
-        const endlessAfter = document.getElementById('endless-mode-checkbox');
-        const multiplayerAfter = document.getElementById('multiplayer-button');
-        fetch('http://127.0.0.1:7242/ingest/bda41e12-0745-4148-84b8-3fd6e6c315e8',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'main.js:280',message:'clearErrors completed',data:{endlessExists:!!endlessAfter,multiplayerExists:!!multiplayerAfter,endlessVisible:endlessAfter?.offsetParent !== null,multiplayerVisible:multiplayerAfter?.offsetParent !== null},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'A,B,C'})}).catch(()=>{});
-        // #endregion
     }
     
     loadHighScore(difficulty) {
@@ -929,23 +907,11 @@ class Game {
         });
         
         startButton.addEventListener('click', () => {
-            // #region agent log
-            const endlessBeforeStart = document.getElementById('endless-mode-checkbox');
-            const multiplayerBeforeStart = document.getElementById('multiplayer-button');
-            fetch('http://127.0.0.1:7242/ingest/bda41e12-0745-4148-84b8-3fd6e6c315e8',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'main.js:596',message:'Start button clicked',data:{endlessExists:!!endlessBeforeStart,multiplayerExists:!!multiplayerBeforeStart,endlessVisible:endlessBeforeStart?.offsetParent !== null,multiplayerVisible:multiplayerBeforeStart?.offsetParent !== null},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'C,D,E'})}).catch(()=>{});
-            // #endregion
-            
             // Play menu click sound
             if (this.soundEffectManager) {
                 this.soundEffectManager.playSound('menu_click');
             }
             startScreen.classList.add('hidden');
-            
-            // #region agent log
-            const endlessAfterHide = document.getElementById('endless-mode-checkbox');
-            const multiplayerAfterHide = document.getElementById('multiplayer-button');
-            fetch('http://127.0.0.1:7242/ingest/bda41e12-0745-4148-84b8-3fd6e6c315e8',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'main.js:604',message:'After hiding start screen',data:{endlessExists:!!endlessAfterHide,multiplayerExists:!!multiplayerAfterHide,endlessVisible:endlessAfterHide?.offsetParent !== null,multiplayerVisible:multiplayerAfterHide?.offsetParent !== null,startScreenHidden:startScreen.classList.contains('hidden')},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'C,D,E'})}).catch(()=>{});
-            // #endregion
             
             this.start();
         });
@@ -958,11 +924,6 @@ class Game {
     }
     
     setupMultiplayerUI() {
-        // #region agent log
-        const endlessAtSetup = document.getElementById('endless-mode-checkbox');
-        fetch('http://127.0.0.1:7242/ingest/bda41e12-0745-4148-84b8-3fd6e6c315e8',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'main.js:610',message:'setupMultiplayerUI called',data:{endlessExists:!!endlessAtSetup,endlessVisible:endlessAtSetup?.offsetParent !== null,endlessParent:endlessAtSetup?.parentElement?.id},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'B,C,D'})}).catch(()=>{});
-        // #endregion
-        
         const multiplayerButton = document.getElementById('multiplayer-button');
         const createPartyButton = document.getElementById('create-party-button');
         const joinPartyButton = document.getElementById('join-party-button');
@@ -974,10 +935,6 @@ class Game {
         const roomCodeInput = document.getElementById('room-code-input');
         const partyLobby = document.getElementById('party-lobby');
         const startScreen = document.getElementById('start-screen');
-        
-        // #region agent log
-        fetch('http://127.0.0.1:7242/ingest/bda41e12-0745-4148-84b8-3fd6e6c315e8',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'main.js:625',message:'Elements found in setupMultiplayerUI',data:{multiplayerExists:!!multiplayerButton,startScreenExists:!!startScreen,multiplayerVisible:multiplayerButton?.offsetParent !== null,startScreenHidden:startScreen?.classList.contains('hidden')},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'B,C,D'})}).catch(()=>{});
-        // #endregion
         
         // Multiplayer button on start screen
         if (multiplayerButton) {
@@ -2500,13 +2457,6 @@ class Game {
     }
     
     start() {
-        // #region agent log
-        const endlessAtStart = document.getElementById('endless-mode-checkbox');
-        const multiplayerAtStart = document.getElementById('multiplayer-button');
-        const startScreenAtStart = document.getElementById('start-screen');
-        fetch('http://127.0.0.1:7242/ingest/bda41e12-0745-4148-84b8-3fd6e6c315e8',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'main.js:1855',message:'start() called',data:{endlessExists:!!endlessAtStart,multiplayerExists:!!multiplayerAtStart,startScreenExists:!!startScreenAtStart,endlessVisible:endlessAtStart?.offsetParent !== null,multiplayerVisible:multiplayerAtStart?.offsetParent !== null,startScreenHidden:startScreenAtStart?.classList.contains('hidden'),endlessDisplay:endlessAtStart?.style.display,multiplayerDisplay:multiplayerAtStart?.style.display,endlessParent:endlessAtStart?.parentElement?.id,multiplayerParent:multiplayerAtStart?.parentElement?.id},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'C,D,E'})}).catch(()=>{});
-        // #endregion
-        
         // Read endless mode setting from checkbox
         const endlessCheckbox = document.getElementById('endless-mode-checkbox');
         this.isEndless = endlessCheckbox ? endlessCheckbox.checked : false;
@@ -2703,7 +2653,9 @@ class Game {
             
             // Update moving targets (they'll check collisions with obstacles and other targets)
             if (this.targetManager) {
-                this.targetManager.updateTargets(deltaTime, currentTime, this.player.position);
+                // Pass camera position (head position) for accurate aiming
+                const playerHeadPosition = this.player.camera.position.clone();
+                this.targetManager.updateTargets(deltaTime, currentTime, playerHeadPosition);
                 
                 // Check if all targets are destroyed (win condition) - skip in endless mode and survival mode
                 if (!this.isEndless && !this.isSurvivalMode && this.targetManager.areAllTargetsDestroyed()) {
@@ -3646,47 +3598,13 @@ if ('serviceWorker' in navigator) {
     });
 }
 
-// Check elements immediately when script loads (before DOMContentLoaded)
-// #region agent log
-if (document.readyState === 'loading' || document.readyState === 'interactive') {
-    const checkEarly = () => {
-        const endlessEarly = document.getElementById('endless-mode-checkbox');
-        const multiplayerEarly = document.getElementById('multiplayer-button');
-        const startScreenEarly = document.getElementById('start-screen');
-        fetch('http://127.0.0.1:7242/ingest/bda41e12-0745-4148-84b8-3fd6e6c315e8',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'main.js:2890',message:'Early check - before DOMContentLoaded',data:{readyState:document.readyState,endlessExists:!!endlessEarly,multiplayerExists:!!multiplayerEarly,startScreenExists:!!startScreenEarly,endlessInDOM:document.body.contains(endlessEarly),multiplayerInDOM:document.body.contains(multiplayerEarly)},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'D,E'})}).catch(()=>{});
-    };
-    if (document.body) {
-        checkEarly();
-    } else {
-        document.addEventListener('DOMContentLoaded', checkEarly, { once: true });
-    }
-}
-// #endregion
-
 // Start the game when the page loads
 window.addEventListener('DOMContentLoaded', () => {
-    // #region agent log
-    const endlessOnLoad = document.getElementById('endless-mode-checkbox');
-    const multiplayerOnLoad = document.getElementById('multiplayer-button');
-    const startScreenOnLoad = document.getElementById('start-screen');
-    fetch('http://127.0.0.1:7242/ingest/bda41e12-0745-4148-84b8-3fd6e6c315e8',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'main.js:2905',message:'DOMContentLoaded - initial state',data:{endlessExists:!!endlessOnLoad,multiplayerExists:!!multiplayerOnLoad,startScreenExists:!!startScreenOnLoad,endlessVisible:endlessOnLoad?.offsetParent !== null,multiplayerVisible:multiplayerOnLoad?.offsetParent !== null,startScreenHidden:startScreenOnLoad?.classList.contains('hidden'),endlessInDOM:document.body.contains(endlessOnLoad),multiplayerInDOM:document.body.contains(multiplayerOnLoad)},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'B,C,D,E'})}).catch(()=>{});
-    // #endregion
-    
     // Remove any existing error divs from previous loads - be very specific
     // Only remove divs that are error overlays, not any other elements
     const existingErrors = document.querySelectorAll('div[data-error-div="true"]');
     
-    // #region agent log
-    fetch('http://127.0.0.1:7242/ingest/bda41e12-0745-4148-84b8-3fd6e6c315e8',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'main.js:2850',message:'Error cleanup before Game init',data:{errorCount:existingErrors.length,errorIds:Array.from(existingErrors).map(el=>el.id||'no-id')},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'A'})}).catch(()=>{});
-    // #endregion
-    
     existingErrors.forEach(el => {
-        // #region agent log
-        const endlessDuringCleanup = document.getElementById('endless-mode-checkbox');
-        const multiplayerDuringCleanup = document.getElementById('multiplayer-button');
-        fetch('http://127.0.0.1:7242/ingest/bda41e12-0745-4148-84b8-3fd6e6c315e8',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'main.js:2854',message:'Processing error element in DOMContentLoaded',data:{elId:el.id||'no-id',willRemove:el.tagName === 'DIV' && el.hasAttribute('data-error-div') && el.getAttribute('data-error-div') === 'true',endlessExists:!!endlessDuringCleanup,multiplayerExists:!!multiplayerDuringCleanup},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'A'})}).catch(()=>{});
-        // #endregion
-        
         // Triple check: must be a div, have the attribute, and match the value
         if (el.tagName === 'DIV' && 
             el.hasAttribute('data-error-div') && 
@@ -3696,22 +3614,9 @@ window.addEventListener('DOMContentLoaded', () => {
         }
     });
     
-    // #region agent log
-    const endlessAfterCleanup = document.getElementById('endless-mode-checkbox');
-    const multiplayerAfterCleanup = document.getElementById('multiplayer-button');
-    fetch('http://127.0.0.1:7242/ingest/bda41e12-0745-4148-84b8-3fd6e6c315e8',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'main.js:2865',message:'After error cleanup, before Game init',data:{endlessExists:!!endlessAfterCleanup,multiplayerExists:!!multiplayerAfterCleanup,endlessVisible:endlessAfterCleanup?.offsetParent !== null,multiplayerVisible:multiplayerAfterCleanup?.offsetParent !== null},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'A,B,C'})}).catch(()=>{});
-    // #endregion
-    
     try {
         window.game = new Game();
         console.log('Game initialized successfully');
-        
-        // #region agent log
-        const endlessAfterInit = document.getElementById('endless-mode-checkbox');
-        const multiplayerAfterInit = document.getElementById('multiplayer-button');
-        const startScreenAfterInit = document.getElementById('start-screen');
-        fetch('http://127.0.0.1:7242/ingest/bda41e12-0745-4148-84b8-3fd6e6c315e8',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'main.js:2875',message:'After Game initialization',data:{endlessExists:!!endlessAfterInit,multiplayerExists:!!multiplayerAfterInit,startScreenExists:!!startScreenAfterInit,endlessVisible:endlessAfterInit?.offsetParent !== null,multiplayerVisible:multiplayerAfterInit?.offsetParent !== null,startScreenHidden:startScreenAfterInit?.classList.contains('hidden'),endlessParent:endlessAfterInit?.parentElement?.id,multiplayerParent:multiplayerAfterInit?.parentElement?.id},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'B,C,D,E'})}).catch(()=>{});
-        // #endregion
         
         // Verify critical UI elements still exist after initialization
         const endlessCheckbox = document.getElementById('endless-mode-checkbox');
@@ -3722,36 +3627,6 @@ window.addEventListener('DOMContentLoaded', () => {
         if (!multiplayerButton) {
             console.warn('Multiplayer button not found after initialization');
         }
-        
-        // #region agent log - Periodic check after a delay to see if elements disappear
-        const checkElements = (delay, label) => {
-            setTimeout(() => {
-                const endlessDelayed = document.getElementById('endless-mode-checkbox');
-                const multiplayerDelayed = document.getElementById('multiplayer-button');
-                const startScreenDelayed = document.getElementById('start-screen');
-                
-                let endlessComputed = null;
-                let multiplayerComputed = null;
-                let startScreenComputed = null;
-                
-                if (endlessDelayed) {
-                    endlessComputed = window.getComputedStyle(endlessDelayed);
-                }
-                if (multiplayerDelayed) {
-                    multiplayerComputed = window.getComputedStyle(multiplayerDelayed);
-                }
-                if (startScreenDelayed) {
-                    startScreenComputed = window.getComputedStyle(startScreenDelayed);
-                }
-                
-                fetch('http://127.0.0.1:7242/ingest/bda41e12-0745-4148-84b8-3fd6e6c315e8',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'main.js:2952',message:`Delayed check ${label} with computed styles`,data:{endlessExists:!!endlessDelayed,multiplayerExists:!!multiplayerDelayed,startScreenExists:!!startScreenDelayed,endlessVisible:endlessDelayed?.offsetParent !== null,multiplayerVisible:multiplayerDelayed?.offsetParent !== null,startScreenHidden:startScreenDelayed?.classList.contains('hidden'),endlessDisplay:endlessDelayed?.style.display,multiplayerDisplay:multiplayerDelayed?.style.display,endlessComputedDisplay:endlessComputed?.display,endlessComputedVisibility:endlessComputed?.visibility,endlessComputedOpacity:endlessComputed?.opacity,multiplayerComputedDisplay:multiplayerComputed?.display,multiplayerComputedVisibility:multiplayerComputed?.visibility,startScreenComputedDisplay:startScreenComputed?.display,endlessParent:endlessDelayed?.parentElement?.id,multiplayerParent:multiplayerDelayed?.parentElement?.id,endlessRect:endlessDelayed ? {width:endlessDelayed.getBoundingClientRect().width,height:endlessDelayed.getBoundingClientRect().height,top:endlessDelayed.getBoundingClientRect().top,left:endlessDelayed.getBoundingClientRect().left} : null,multiplayerRect:multiplayerDelayed ? {width:multiplayerDelayed.getBoundingClientRect().width,height:multiplayerDelayed.getBoundingClientRect().height,top:multiplayerDelayed.getBoundingClientRect().top,left:multiplayerDelayed.getBoundingClientRect().left} : null},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'C,D,E'})}).catch(()=>{});
-            }, delay);
-        };
-        
-        checkElements(2000, '2s after init');
-        checkElements(5000, '5s after init');
-        checkElements(10000, '10s after init');
-        // #endregion
     } catch (error) {
         console.error('Error initializing game:', error);
         console.error('Stack trace:', error.stack);
